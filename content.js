@@ -35,7 +35,8 @@
     const deleteCount = whole.length;
 
     if (entry.accent) {
-      // "v/vec " puts the mark on v; "/vec " puts it on the next typed char.
+      // "v/vec " puts the mark on v; "/vec " starts an accent that goes over
+      // every letter/digit typed next ("/vec AB" -> A⃗B⃗).
       if (prev && !/\s/.test(prev)) return { deleteCount, insert: entry.symbol };
       return { deleteCount, insert: "", pendingMark: entry.symbol };
     }
@@ -52,6 +53,11 @@
 
   function isPrintable(e) {
     return e.key.length === 1 && !e.ctrlKey && !e.metaKey;
+  }
+
+  // Letters and digits go under an active accent; anything else ends it.
+  function isAccentable(e) {
+    return isPrintable(e) && /^[\p{L}\p{N}]$/u.test(e.key);
   }
 
   function isModifierKey(key) {
@@ -88,7 +94,7 @@
   function setUpDocs() {
     const attached = new WeakSet();
     let buffer = "";
-    let pendingMark = null;
+    let accentMark = null;
 
     const sendKey = (target, type, init) =>
       target.dispatchEvent(
@@ -119,20 +125,19 @@
       if (!e.isTrusted) return; // ignore our own synthetic events
       if (!settings.enabled || e.isComposing) {
         buffer = "";
-        pendingMark = null;
+        accentMark = null;
         return;
       }
       const target = frameDoc.activeElement || frameDoc.body;
 
-      if (pendingMark) {
-        if (isPrintable(e) && e.key !== " ") {
+      if (accentMark && !isModifierKey(e.key)) {
+        if (isAccentable(e)) {
           swallow(e);
-          docsType(target, e.key + pendingMark);
-          buffer += e.key + pendingMark;
-          pendingMark = null;
+          docsType(target, e.key + accentMark);
+          buffer += e.key + accentMark;
           return;
         }
-        if (!isModifierKey(e.key)) pendingMark = null;
+        accentMark = null;
       }
 
       if (isPlainSpace(e)) {
@@ -142,7 +147,7 @@
           docsBackspace(target, match.deleteCount);
           docsType(target, match.insert);
           buffer = buffer.slice(0, -match.deleteCount) + match.insert;
-          pendingMark = match.pendingMark || null;
+          accentMark = match.pendingMark || null;
           return;
         }
       }
@@ -170,7 +175,7 @@
     // Clicking somewhere else in the document moves the caret.
     document.addEventListener("mousedown", () => {
       buffer = "";
-      pendingMark = null;
+      accentMark = null;
     }, true);
 
     attach();
@@ -262,26 +267,52 @@
     return null;
   }
 
+  // While an accent is active and nothing has been typed under it yet, it is
+  // shown over a non-breaking space so you can see it waiting for a letter.
+  const PLACEHOLDER = "\u00A0";
+
   function setUpGeneric() {
-    let pendingMark = null;
+    let accent = null; // { mark, placeholder }
+
+    // Rich-text editors may turn the placeholder's no-break space into a
+    // plain space, so accept either.
+    function hasPlaceholder(ctx) {
+      const t = ctx.textBefore;
+      return accent.placeholder && t.endsWith(accent.mark) && /[ \u00A0]$/.test(t.slice(0, -accent.mark.length));
+    }
+
+    window.addEventListener("mousedown", () => (accent = null), true);
 
     window.addEventListener("keydown", (e) => {
       if (!e.isTrusted || !settings.enabled || e.isComposing) {
-        pendingMark = null;
+        accent = null;
         return;
       }
 
-      if (pendingMark) {
-        if (isPrintable(e) && e.key !== " ") {
-          const ctx = currentContext();
-          if (ctx) {
-            e.preventDefault();
-            ctx.replace(0, e.key + pendingMark);
-          }
-          pendingMark = null;
+      if (accent && !isModifierKey(e.key)) {
+        const ctx = currentContext();
+        // The accent only continues while the caret is right after it.
+        if (!ctx || !ctx.textBefore.endsWith(accent.mark)) accent = null;
+      }
+
+      if (accent && !isModifierKey(e.key)) {
+        const ctx = currentContext();
+        const placeholder = hasPlaceholder(ctx);
+        if (isAccentable(e)) {
+          e.preventDefault();
+          ctx.replace(placeholder ? 2 : 0, e.key + accent.mark);
+          accent.placeholder = false;
           return;
         }
-        if (!isModifierKey(e.key)) pendingMark = null;
+        // Any other key ends the accent and removes an unused placeholder.
+        accent = null;
+        if (placeholder) {
+          ctx.replace(2, "");
+          if (e.key === " " || e.key === "Backspace") {
+            e.preventDefault();
+            return;
+          }
+        }
       }
 
       if (!isPlainSpace(e)) return;
@@ -291,8 +322,12 @@
       if (!match) return;
 
       e.preventDefault();
-      ctx.replace(match.deleteCount, match.insert);
-      pendingMark = match.pendingMark || null;
+      if (match.pendingMark) {
+        ctx.replace(match.deleteCount, PLACEHOLDER + match.pendingMark);
+        accent = { mark: match.pendingMark, placeholder: true };
+      } else {
+        ctx.replace(match.deleteCount, match.insert);
+      }
     }, true);
   }
 
