@@ -2,33 +2,31 @@
 
 Symbol Writer is a Firefox and Chrome extension that turns Google Docs equation shortcuts into real symbols as you type. It works in any text box on any website: Google Docs, Google Slides, Gmail, notes apps, rich-text editors, comment boxes and search bars.
 
-<video src="symbol-writer-demo.mov" controls muted width="100%"></video>
-
-[Watch the demo video](symbol-writer-demo.mov) if it doesn't play above.
+## Demo
+https://github.com/user-attachments/assets/116956bc-8020-4c9e-a902-1db4222f6a36
 
 ## Installation
 
-### Firefox (temporary)
+### Firefox
+
+1. Go to the [latest release](https://github.com/RaianaRatti/symbol-writer/releases/latest).
+2. Click `symbol-writer-<version>.xpi`.
+3. Firefox asks whether to add Symbol Writer. Click **Add**.
+
+The add-on is signed by Mozilla, so it stays installed after restarting Firefox.
+
+### Firefox (temporary, for development)
 
 1. Open `about:debugging#/runtime/this-firefox`.
 2. Click **Load Temporary Add-on…** and choose `manifest.json` in this folder.
 
 The add-on stays loaded until you restart Firefox.
 
-### Firefox (permanent)
-
-Firefox only installs signed add-ons permanently. Build the package:
-
-```bash
-./build.sh
-```
-
-Then upload `dist/symbol-writer-<version>-firefox.zip` at https://addons.mozilla.org/developers/addon/submit/. Choose **On your own** to get a signed `.xpi` you can install yourself, or **On this site** to publish it publicly.
-
 ### Chrome
 
-1. Open `chrome://extensions` and turn on **Developer mode**.
-2. Click **Load unpacked** and choose this folder.
+1. Download `symbol-writer-<version>-chrome.zip` from the [latest release](https://github.com/RaianaRatti/symbol-writer/releases/latest) and unzip it (or clone this repo).
+2. Open `chrome://extensions` and turn on **Developer mode**.
+3. Click **Load unpacked** and choose the unzipped folder.
 
 For the Chrome Web Store, run `./build.sh` and upload `dist/symbol-writer-<version>-chrome.zip`.
 
@@ -65,7 +63,13 @@ Shortcut names come from https://equation-shortcuts.notuom.com/ and are case-sen
 
 Pull requests are welcome. For major changes, please open an issue first to discuss what you would like to change.
 
-After a change, bump `version` in `manifest.json` and run `./build.sh` again before uploading.
+### Releasing
+
+1. Bump `version` in `manifest.json` (Mozilla won't sign the same version twice) and push.
+2. Create a GitHub release with a tag that matches the version, e.g. `v1.0.1`.
+3. The [Build and Release](.github/workflows/build.yml) workflow builds the extension, gets the `.xpi` signed by addons.mozilla.org, and attaches the `.xpi` and the Chrome zip to the release.
+
+The workflow needs two repository secrets, `AMO_JWT_ISSUER` and `AMO_JWT_SECRET`, from https://addons.mozilla.org/developers/addon/api/key/.
 
 ## License
 

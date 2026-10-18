@@ -1,0 +1,57 @@
+name: Build and Release
+
+on:
+  release:
+    types: [created]
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check release tag matches manifest version
+        run: |
+          VERSION=$(python3 -c 'import json; print(json.load(open("manifest.json"))["version"])')
+          TAG="${{ github.event.release.tag_name }}"
+          if [ "${TAG#v}" != "$VERSION" ]; then
+            echo "Release tag $TAG does not match manifest.json version $VERSION"
+            exit 1
+          fi
+          echo "VERSION=$VERSION" >> "$GITHUB_ENV"
+
+      - name: Build zips
+        run: ./build.sh
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      # Firefox only installs signed add-ons permanently. "unlisted" signs the
+      # .xpi through addons.mozilla.org without publishing it on the store.
+      - name: Sign Firefox add-on
+        env:
+          AMO_JWT_ISSUER: ${{ secrets.AMO_JWT_ISSUER }}
+          AMO_JWT_SECRET: ${{ secrets.AMO_JWT_SECRET }}
+        run: |
+          mkdir -p build/firefox
+          unzip -q "dist/symbol-writer-$VERSION-firefox.zip" -d build/firefox
+          npx --yes web-ext@8 sign \
+            --source-dir build/firefox \
+            --artifacts-dir web-ext-artifacts \
+            --channel unlisted \
+            --api-key "$AMO_JWT_ISSUER" \
+            --api-secret "$AMO_JWT_SECRET"
+          mv web-ext-artifacts/*.xpi "symbol-writer-$VERSION.xpi"
+
+      - name: Upload to release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            symbol-writer-${{ env.VERSION }}.xpi
+            dist/symbol-writer-${{ env.VERSION }}-chrome.zip
