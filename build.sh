@@ -7,7 +7,7 @@
 set -e
 cd "$(dirname "$0")"
 VERSION=$(sed -n 's/.*"version": "\(.*\)".*/\1/p' manifest.json)
-FILES="background.js content.js symbols.js popup.html popup.css popup.js icons"
+FILES="background.js content.js symbols.js popup.html popup.css popup.js icons fonts"
 mkdir -p dist
 
 build() {

@@ -1,73 +1,89 @@
+@font-face { font-family: "Pixelify Sans"; src: url("fonts/PixelifySans.ttf"); font-weight: 400 700; }
+@font-face { font-family: "VT323"; src: url("fonts/VT323.ttf"); }
+
 :root {
-  --bg: #fff; --fg: #202124; --muted: #5f6368; --line: #e0e3e7;
-  --chip: #f1f3f4; --chip-hover: #e8f0fe; --accent: #1a73e8;
-}
-@media (prefers-color-scheme: dark) {
-  :root {
-    --bg: #202124; --fg: #e8eaed; --muted: #9aa0a6; --line: #3c4043;
-    --chip: #2d2e31; --chip-hover: #283a56; --accent: #8ab4f8;
-  }
+  --bg: #fff; --fg: #111; --muted: #6b6b6b; --line: #111;
+  --pink: #ffe2ec; --pink-strong: #f6b6ce;
+  --pixel: "Pixelify Sans", ui-monospace, Menlo, monospace;
+  --mono: "VT323", ui-monospace, Menlo, monospace;
+  color-scheme: light;
 }
 * { box-sizing: border-box; }
 body {
-  width: 360px; margin: 0; padding: 12px;
-  font: 13px/1.4 system-ui, -apple-system, "Segoe UI", sans-serif;
+  width: 360px; margin: 0; padding: 14px;
+  font: 14px/1.4 var(--pixel);
   background: var(--bg); color: var(--fg);
 }
+code, kbd { font-family: var(--mono); font-size: 18px; line-height: 1; }
+
 header { display: flex; align-items: center; justify-content: space-between; }
-.title { display: flex; align-items: center; gap: 8px; font-size: 15px; font-weight: 600; }
-.hint { color: var(--muted); margin: 8px 0; }
-code, kbd { font-family: ui-monospace, Menlo, monospace; font-size: 12px; }
-kbd { border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; }
+.title { display: flex; align-items: center; gap: 10px; font-size: 20px; font-weight: 600; }
+.title img { image-rendering: pixelated; }
 
 .options {
-  display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px;
-  padding: 8px 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line);
+  display: flex; flex-direction: column; gap: 12px;
+  margin-top: 14px; padding: 12px 0; border-top: 2px solid var(--line); border-bottom: 2px solid var(--line);
 }
-.options label { display: flex; align-items: center; gap: 4px; cursor: pointer; }
-.options .full { flex-basis: 100%; }
+.options .row { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+.prefixes { display: flex; gap: 8px; }
 
-.switch { position: relative; width: 36px; height: 20px; }
+/* "/" and "\" are toggle chips: the checkbox is hidden, the chip shows its state. */
+.chip {
+  display: grid; place-items: center; width: 36px; height: 30px; cursor: pointer;
+  border: 2px solid var(--line); background: var(--bg); color: var(--muted);
+}
+.chip input { position: absolute; opacity: 0; pointer-events: none; }
+.chip:has(input:checked) { background: var(--pink); color: var(--fg); box-shadow: 2px 2px 0 var(--line); }
+.chip:has(input:focus-visible) { outline: 2px dashed var(--line); outline-offset: 2px; }
+
+.toggle { justify-content: flex-start !important; cursor: pointer; }
+.toggle input, .switch input { margin: 0; }
+.toggle input {
+  appearance: none; width: 16px; height: 16px; flex: none; cursor: pointer;
+  border: 2px solid var(--line); background: var(--bg);
+}
+.toggle input:checked { background: var(--pink-strong); box-shadow: inset 0 0 0 2px var(--bg); }
+
+.switch { position: relative; width: 40px; height: 22px; }
 .switch input { opacity: 0; width: 0; height: 0; }
 .slider {
-  position: absolute; inset: 0; border-radius: 10px; cursor: pointer;
-  background: var(--line); transition: background .15s;
+  position: absolute; inset: 0; cursor: pointer;
+  border: 2px solid var(--line); background: var(--bg);
 }
 .slider::before {
-  content: ""; position: absolute; left: 3px; top: 3px; width: 14px; height: 14px;
-  border-radius: 50%; background: #fff; transition: transform .15s;
+  content: ""; position: absolute; left: 2px; top: 2px; width: 14px; height: 14px;
+  background: var(--line); transition: transform .1s steps(2);
 }
-.switch input:checked + .slider { background: var(--accent); }
-.switch input:checked + .slider::before { transform: translateX(16px); }
+.switch input:checked + .slider { background: var(--pink); }
+.switch input:checked + .slider::before { transform: translateX(18px); }
 
 #search {
-  width: 100%; margin: 10px 0 6px; padding: 6px 8px;
-  border: 1px solid var(--line); border-radius: 6px;
+  width: 100%; margin: 14px 0 6px; padding: 7px 9px;
+  border: 2px solid var(--line); border-radius: 0; outline: none;
   background: var(--bg); color: var(--fg); font: inherit;
 }
+#search:focus { box-shadow: 3px 3px 0 var(--pink-strong); }
 #list { max-height: 320px; overflow-y: auto; }
-h3 { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: var(--muted); margin: 10px 0 4px; }
+h3 { font-size: 12px; font-weight: 500; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 12px 0 6px; }
 .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; }
 .item {
-  display: flex; align-items: center; gap: 8px; padding: 4px 6px; border: 0;
-  border-radius: 6px; background: var(--chip); color: var(--fg); cursor: pointer;
+  display: flex; align-items: center; gap: 8px; padding: 3px 6px;
+  border: 2px solid transparent; border-radius: 0; background: var(--bg); color: var(--fg); cursor: pointer;
   text-align: left; font: inherit; min-width: 0;
 }
-.item:hover { background: var(--chip-hover); }
+.item:hover { background: var(--pink); border-color: var(--line); }
 .sym { font-size: 17px; width: 22px; text-align: center; font-family: "Cambria Math", "STIX Two Math", serif; }
-.name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; }
+.name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 17px; }
 .empty { color: var(--muted); text-align: center; padding: 16px 0; }
 #toast {
   position: fixed; bottom: 12px; left: 50%; transform: translateX(-50%);
-  background: var(--fg); color: var(--bg); padding: 4px 10px; border-radius: 12px; font-size: 12px;
+  background: var(--fg); color: var(--bg); padding: 4px 10px; font-size: 13px;
 }
-.ex { font-family: "STIX Two Math", "Cambria Math", "Times New Roman", serif; font-size: 15px; color: var(--fg); }
 .notice {
-  margin: 10px 0 0; padding: 8px 10px; border-radius: 6px;
-  background: #fef7e0; color: #5c4400; font-size: 12px;
+  margin: 12px 0 0; padding: 8px 10px; border: 2px solid var(--line);
+  background: var(--pink); color: var(--fg); font-size: 13px;
 }
-@media (prefers-color-scheme: dark) { .notice { background: #3d3418; color: #fde293; } }
 .notice button {
-  display: block; margin-top: 6px; padding: 4px 10px; border: 0; border-radius: 4px;
-  background: var(--accent); color: var(--bg); font: inherit; font-weight: 600; cursor: pointer;
+  display: block; margin-top: 6px; padding: 4px 10px; border: 2px solid var(--line);
+  background: var(--fg); color: var(--bg); font: inherit; cursor: pointer;
 }

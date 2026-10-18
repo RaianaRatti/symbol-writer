@@ -7,7 +7,7 @@
 <body>
   <header>
     <div class="title">
-      <img src="icons/icon32.png" alt="" width="20" height="20" />
+      <img src="icons/icon48.png" alt="" width="24" height="24" />
       <span>Symbol Writer</span>
     </div>
     <label class="switch" title="Turn on/off (Alt+Shift+S)">
@@ -21,13 +21,15 @@
     <button id="grant">Allow on all sites</button>
   </div>
 
-  <p class="hint">Type a shortcut, then press <kbd>Space</kbd>.<br /><code>/alpha</code> → <span class="ex">α</span> &nbsp; <code>\leq</code> → <span class="ex">≤</span> &nbsp; <code>v/vec</code> → <span class="ex">v⃗</span></p>
-
   <section class="options">
-    <span>Start shortcuts with:</span>
-    <label><input type="checkbox" id="prefix-slash" /> <code>/</code></label>
-    <label><input type="checkbox" id="prefix-backslash" /> <code>\</code></label>
-    <label class="full"><input type="checkbox" id="keepSpace" /> Keep the space after the symbol</label>
+    <div class="row">
+      <span>Start shortcuts with</span>
+      <div class="prefixes">
+        <label class="chip"><input type="checkbox" id="prefix-slash" /><code>/</code></label>
+        <label class="chip"><input type="checkbox" id="prefix-backslash" /><code>\</code></label>
+      </div>
+    </div>
+    <label class="row toggle"><input type="checkbox" id="keepSpace" /> Keep the space after the symbol</label>
   </section>
 
   <input type="search" id="search" placeholder="Search shortcuts… (e.g. arrow, pi)" autofocus />
