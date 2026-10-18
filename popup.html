@@ -1,0 +1,40 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8" />
+  <link rel="stylesheet" href="popup.css" />
+</head>
+<body>
+  <header>
+    <div class="title">
+      <img src="icons/icon32.png" alt="" width="20" height="20" />
+      <span>Symbol Writer</span>
+    </div>
+    <label class="switch" title="Turn on/off (Alt+Shift+S)">
+      <input type="checkbox" id="enabled" />
+      <span class="slider"></span>
+    </label>
+  </header>
+
+  <div id="access" class="notice" hidden>
+    Symbol Writer doesn't have access to websites yet, so shortcuts won't work.
+    <button id="grant">Allow on all sites</button>
+  </div>
+
+  <p class="hint">Type a shortcut, then press <kbd>Space</kbd>.<br /><code>/alpha</code> → <span class="ex">α</span> &nbsp; <code>\leq</code> → <span class="ex">≤</span> &nbsp; <code>v/vec</code> → <span class="ex">v⃗</span></p>
+
+  <section class="options">
+    <span>Start shortcuts with:</span>
+    <label><input type="checkbox" id="prefix-slash" /> <code>/</code></label>
+    <label><input type="checkbox" id="prefix-backslash" /> <code>\</code></label>
+    <label class="full"><input type="checkbox" id="keepSpace" /> Keep the space after the symbol</label>
+  </section>
+
+  <input type="search" id="search" placeholder="Search shortcuts… (e.g. arrow, pi)" autofocus />
+  <div id="list"></div>
+  <div id="toast" hidden>Copied</div>
+
+  <script src="symbols.js"></script>
+  <script src="popup.js"></script>
+</body>
+</html>

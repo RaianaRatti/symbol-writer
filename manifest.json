@@ -1,0 +1,65 @@
+{
+  "manifest_version": 3,
+  "name": "Symbol Writer",
+  "version": "1.0.0",
+  "description": "Type Google Docs equation shortcuts like /alpha or \\leq in any text box (Docs, Slides, notes apps, email) and they turn into real symbols.",
+  "icons": {
+    "16": "icons/icon16.png",
+    "48": "icons/icon48.png",
+    "128": "icons/icon128.png"
+  },
+  "permissions": [
+    "storage"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "scripts": [
+      "background.js"
+    ]
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "Symbol Writer",
+    "default_icon": {
+      "16": "icons/icon16.png",
+      "32": "icons/icon32.png",
+      "48": "icons/icon48.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "js": [
+        "symbols.js",
+        "content.js"
+      ],
+      "all_frames": true,
+      "match_about_blank": true,
+      "run_at": "document_idle"
+    }
+  ],
+  "commands": {
+    "toggle": {
+      "suggested_key": {
+        "default": "Alt+Shift+S"
+      },
+      "description": "Turn Symbol Writer on or off"
+    }
+  },
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "{43cbc3ec-6b9a-4539-b7d8-8ba873383f69}",
+      "strict_min_version": "142.0",
+      "data_collection_permissions": {
+        "required": [
+          "none"
+        ]
+      }
+    }
+  }
+}
